@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>terminalis</title>
+<meta name="description" content="I develop software primarily for my own use and publish it for anyone else who may find it useful.">
+<meta name="theme-color" content="#d8c8ac">
+<link rel="canonical" href="https://terminalis.github.io/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23d8c8ac'/%3E%3Cpath d='M5 3l14 13L5 29' fill='none' stroke='%232a1f14' stroke-width='5'/%3E%3Crect x='23' width='3' height='32' fill='%239e341e'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/InstrumentSerif-Italic.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <canvas id="mark" role="img" aria-label="A line strikes a wall and returns, thinning until it stops."></canvas>
+    <p class="fig">fig. 1. <em>imago vocis</em></p>
+    <p class="intro">I develop software primarily for my own use and publish it for anyone else who may find it useful.</p>
+    <div class="title">
+      <h1>terminalis</h1>
+      <p class="gloss"><em>adj.</em> of or belonging to boundaries; final.</p>
+    </div>
+  </section>
+
+  <section class="legend">
+    <article class="row" id="gittin">
+      <h2>Gittin</h2>
+      <p>A writing app for plain text, with git built into the desktop app. <a href="https://gittin.app">gittin.app</a></p>
+      <div class="figs" data-release="gittin"></div>
+      <dl class="ways">
+        <dt>web</dt><dd><a href="https://gittin.app/use/">use in browser</a></dd>
+        <dt>windows</dt><dd><a href="https://apps.microsoft.com/detail/9NDJ4HR0FF1H">microsoft store</a></dd>
+        <dt>linux</dt><dd><code>flatpak install --user https://terminalis.github.io/packages/flatpak/gittin.flatpakref</code><button type="button" hidden data-copy="flatpak install --user https://terminalis.github.io/packages/flatpak/gittin.flatpakref">copy</button></dd>
+      </dl>
+    </article>
+    <article class="row" id="envarsa">
+      <h2>Envarsa</h2>
+      <p>A local-first library for your environment variables. <a href="https://envarsa.dev">envarsa.dev</a></p>
+      <div class="figs" data-release="envarsa"></div>
+      <dl class="ways">
+        <dt>windows</dt><dd><a href="https://apps.microsoft.com/detail/9NQCBXD2WQ2M">microsoft store</a> or <a href="https://github.com/terminalis/envarsa/releases/latest">portable exe</a></dd>
+        <dt>linux</dt><dd><code>flatpak install --user https://terminalis.github.io/packages/flatpak/envarsa.flatpakref</code><button type="button" hidden data-copy="flatpak install --user https://terminalis.github.io/packages/flatpak/envarsa.flatpakref">copy</button></dd>
+      </dl>
+    </article>
+  </section>
+
+  <dl class="notes">
+    <div><dt><em>ownership</em></dt><dd>Your data is stored on your device and leaves it only at your direction. It can always be exported.</dd></div>
+    <div><dt><em>privacy</em></dt><dd>These apps contain no analytics, telemetry or usage tracking.</dd></div>
+    <div><dt><em>focus</em></dt><dd>No prompts, upsells or mandatory sign-ups stand between you and the purpose of the app.</dd></div>
+    <div><dt><em>open source</em></dt><dd>Every app I publish is free and open source.</dd></div>
+  </dl>
+
+  <footer>
+    <span id="weight"></span>
+    <a href="https://github.com/terminalis">github.com/terminalis</a>
+    <a href="https://github.com/terminalis/packages">terminalis/packages</a>
+  </footer>
+</main>
+<div class="line" aria-hidden="true"></div>
+<canvas class="moth" id="moth" aria-hidden="true"></canvas>
+</body>
+</html>
