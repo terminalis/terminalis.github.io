@@ -28,6 +28,8 @@ h1{font-size:clamp(72px,10.4vw,168px);line-height:.95;margin:0}
 .ways dt{opacity:.66}
 .figs{text-align:right;white-space:nowrap}
 code{font:inherit;overflow-wrap:anywhere}
+code span{font-size:0;white-space:nowrap}
+code span::before{content:"\2026";font-size:1rem}
 button{font:inherit;color:var(--paper);background:var(--ink);border:0;padding:0 8px;margin-left:8px;cursor:pointer}
 .notes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;border-top:1px solid var(--ink);margin:0 var(--pad);padding:20px 0 0}
 .notes dt em{font-size:22px}
