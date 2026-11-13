@@ -99,7 +99,6 @@ jobs:
         run: |
           python3 - <<'EOF'
           import html, json, os, re, subprocess
-          from datetime import datetime
           from pathlib import Path
 
           def gh(path):
@@ -109,50 +108,33 @@ jobs:
           def line(text, pattern):
               return re.search(pattern, text, re.M).group(1).strip()
 
-          apps = {}
-          for repo in os.environ['FLATPAK_APPS'].split():
-              slug = repo.split('/')[1]
-              ref = Path('flatpak', f'{slug}.flatpakref').read_text()
-              app = apps.setdefault(repo, {})
-              app.setdefault('name', line(ref, r'^Title=(.+)$'))
-              app.setdefault('site', gh(f'repos/{repo}')['homepage'])
-              app['flatpak'] = f'flatpak install --user https://terminalis.github.io/packages/flatpak/{slug}.flatpakref'
-
-          for meta in sorted(Path('fdroid/metadata').glob('*.yml')):
-              text = meta.read_text()
-              repo = line(text, r'^SourceCode: https://github\.com/(\S+)$')
-              title = Path(os.environ['FDROID_BUILD'], meta.stem, 'fastlane/metadata/android/en-US/title.txt')
-              app = apps.setdefault(repo, {})
-              app.setdefault('name', title.read_text().strip())
-              app.setdefault('site', line(text, r'^WebSite: (\S+)$'))
-              app['android'] = meta.stem
-
-          def copy(text):
-              return f'<button type="button" hidden data-copy="{html.escape(text)}">copy</button>'
-
-          rows = []
-          for repo, app in sorted(apps.items(), key=lambda item: item[1]['name'].casefold()):
+          def row(repo, name, app_id):
               release = gh(f'repos/{repo}/releases/latest')
-              published = datetime.fromisoformat(release['published_at'].replace('Z', '+00:00'))
-              ways = []
-              if 'flatpak' in app:
-                  ways.append(f'<dt>linux</dt><dd><code>{html.escape(app["flatpak"])}</code>{copy(app["flatpak"])}</dd>')
-              if 'android' in app:
-                  ways.append(f'<dt>android</dt><dd><a href="#fdroid">F-Droid repository</a>, app ID <code>{html.escape(app["android"])}</code>{copy(app["android"])}</dd>')
-              rows.append('\n'.join([
-                  f'    <article class="app" id="{html.escape(repo.split("/")[1])}">',
-                  f'      <h2><a href="{html.escape(app["site"])}">{html.escape(app["name"])}</a></h2>',
-                  f'      <p class="release">{html.escape(release["tag_name"])}, {published.day} {published:%b %Y}</p>',
-                  '      <dl class="ways">',
-                  *(f'        {way}' for way in ways),
-                  '      </dl>',
-                  '    </article>',
-              ]))
+              return (
+                  f'      <li><a href="https://github.com/{html.escape(repo)}">{html.escape(name)}</a>'
+                  f'<span>{html.escape(release["tag_name"])}</span>'
+                  f'<span><code>{html.escape(app_id)}</code>'
+                  f'<button type="button" hidden data-copy="{html.escape(app_id)}">copy</button></span></li>'
+              )
+
+          flatpak = []
+          for repo in os.environ['FLATPAK_APPS'].split():
+              ref = Path('flatpak', f'{repo.split("/")[1]}.flatpakref').read_text()
+              flatpak.append((line(ref, r'^Title=(.+)$'), repo, line(ref, r'^Name=(.+)$')))
+
+          fdroid = []
+          for meta in Path('fdroid/metadata').glob('*.yml'):
+              repo = line(meta.read_text(), r'^SourceCode: https://github\.com/(\S+)$')
+              title = Path(os.environ['FDROID_BUILD'], meta.stem, 'fastlane/metadata/android/en-US/title.txt')
+              fdroid.append((title.read_text().strip(), repo, meta.stem))
 
           page = Path('_site/index.html')
           text = page.read_text()
-          assert text.count('<!-- apps -->') == 1
-          page.write_text(text.replace('<!-- apps -->', '\n'.join(rows)))
+          for marker, apps in (('<!-- flatpak apps -->', flatpak), ('<!-- fdroid apps -->', fdroid)):
+              assert text.count(marker) == 1
+              rows = [row(repo, name, app_id) for name, repo, app_id in sorted(apps, key=lambda app: app[0].casefold())]
+              text = text.replace(marker, '\n'.join(rows))
+          page.write_text(text)
           EOF
 
       - uses: actions/upload-pages-artifact@v5

@@ -15,19 +15,18 @@ main{padding:0 calc(var(--wall) + var(--pad)) 0 var(--pad);max-width:calc(52rem 
 header{min-height:var(--mark);padding:var(--pad) calc(var(--mark) - var(--wall)) 32px 0}
 h1{font-size:clamp(44px,7vw,88px);line-height:.95}
 header p{margin:14px 0 0;max-width:28ch}
-.app,.repo{position:relative;padding:22px 0 30px}
-.app::before,.repo::before{content:"";position:absolute;top:0;left:0;right:0;height:calc(2 * var(--u));background:var(--checker)}
-.app{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:4px 24px}
-.app h2{font-size:44px;line-height:1}
-.release{margin:0;white-space:nowrap}
-.ways{grid-column:1/-1;display:grid;grid-template-columns:72px minmax(0,1fr);gap:6px 12px;margin:14px 0 0}
-.ways dd{margin:0;min-width:0}
-.repo h2{font-size:32px;line-height:1.1;margin-bottom:12px}
+.repo{position:relative;padding:28px 0 44px}
+.repo::before{content:"";position:absolute;top:0;left:0;right:0;height:calc(2 * var(--u));background:var(--checker)}
+.repo h2{font-size:56px;line-height:1;margin-bottom:24px}
+.repo .key{font-size:12px;margin:10px 0 0}
+.apps + .key{margin-top:24px}
+.apps{list-style:none;margin:28px 0 0;padding:0}
+.apps li{display:grid;grid-template-columns:minmax(0,1fr) 7ch minmax(0,1.6fr);align-items:baseline;gap:4px 24px;padding:6px 0}
+.apps li span{white-space:nowrap}
 .repo p{margin:0 0 12px;max-width:62ch}
 .repo .cmd{position:relative;max-width:none;padding-left:20px}
 .cmd::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:calc(4 * var(--u));background:var(--checker)}
 code{font:inherit;overflow-wrap:anywhere}
-.repo p:not(.cmd) code{background:#fff;color:#000;padding:0 4px}
 button{font:inherit;font-size:13px;color:#fff;background:#000;border:1px solid #fff;padding:0 8px;margin-left:10px;cursor:pointer;vertical-align:1px}
 button:hover{background:#fff;color:#000}
 footer{display:flex;flex-wrap:wrap;gap:6px 24px;padding:36px 0 56px;font-size:13px}
@@ -35,8 +34,7 @@ footer{display:flex;flex-wrap:wrap;gap:6px 24px;padding:36px 0 56px;font-size:13
   :root{--u:1px;--pad:16px}
   header{padding-top:20px}
   h1{font-size:40px}
-  .app{grid-template-columns:minmax(0,1fr)}
-  .app h2{font-size:36px}
-  .ways{grid-template-columns:minmax(0,1fr);gap:2px}
-  .ways dd{margin-bottom:10px}
+  .repo h2{font-size:44px}
+  .apps li{grid-template-columns:minmax(0,1fr) auto;gap:2px 16px}
+  .apps li span:last-child{grid-column:1/-1;white-space:normal}
 }
