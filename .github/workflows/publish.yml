@@ -161,3 +161,8 @@ jobs:
 
       - id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Redeploy the homepage
+        env:
+          GH_TOKEN: ${{ secrets.HOMEPAGE_REPO_TOKEN }}
+        run: gh workflow run pages.yml --repo terminalis/terminalis --ref main
