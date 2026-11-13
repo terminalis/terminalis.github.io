@@ -1,0 +1,163 @@
+# Publishes terminalis.github.io: the packages page from site/ at the root, and
+# the signed package repositories under terminalis.github.io/packages/. The
+# Flatpak repository is built into packages/flatpak beside its .flatpakref and
+# .flatpakrepo files, and the F-Droid repository built from fdroid/ is published
+# at packages/fdroid/repo.
+#
+# Both repositories are rebuilt from scratch on every run. The Flatpak repo
+# holds one commit per app: each app's latest *_x86_64.flatpak bundle,
+# imported and signed. The F-Droid repo holds the latest APK of each app with a
+# file in fdroid/metadata/. The page's app list is generated from the same apps.
+# Each app's release workflow starts this workflow; every push to main
+# redeploys it too.
+
+name: publish
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; don't cancel one in progress.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  # GitHub repos whose latest release attaches one *_x86_64.flatpak bundle.
+  FLATPAK_APPS: terminalis/envarsa terminalis/gittin
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/configure-pages@v6
+
+      # The site is assembled in _site/. The Flatpak repo is built into a copy
+      # of flatpak/, beside its .flatpakref and .flatpakrepo files.
+      # build-import-bundle needs an existing repo, hence ostree init.
+      - name: Build the Flatpak repo from each app's newest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GPG_KEY: ${{ secrets.FLATPAK_GPG_PRIVATE_KEY }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak ostree
+          echo "$GPG_KEY" | gpg --batch --import
+          fpr=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ {print $10; exit}')
+          echo "Flatpak signing key: $fpr"
+          mkdir -p _site/packages
+          cp -r site/. _site/
+          cp -r flatpak _site/packages/
+          ostree init --mode=archive --repo=_site/packages/flatpak
+          for app in $FLATPAK_APPS; do
+            dir="$RUNNER_TEMP/${app//\//_}"
+            gh release download --repo "$app" --pattern '*_x86_64.flatpak' --dir "$dir"
+            flatpak build-import-bundle --gpg-sign="$fpr" _site/packages/flatpak "$dir"/*_x86_64.flatpak
+          done
+          flatpak build-update-repo --gpg-sign="$fpr" --title="Terminalis" _site/packages/flatpak
+
+      - name: Build the F-Droid repo from each app's newest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FDROID_KEYSTORE: ${{ secrets.FDROID_KEYSTORE }}
+          FDROID_KEYSTORE_PASSWORD: ${{ secrets.FDROID_KEYSTORE_PASSWORD }}
+        run: |
+          work="$RUNNER_TEMP/fdroid"
+          cp -r fdroid "$work"
+          chmod 600 "$work/config.yml"
+          echo "$FDROID_KEYSTORE" | base64 -d > "$work/keystore.p12"
+          mkdir "$work/repo"
+          for meta in fdroid/metadata/*.yml; do
+            appid=$(basename "$meta" .yml)
+            src=$(sed -n 's|^SourceCode: https://github.com/||p' "$meta")
+            tag=$(gh release view --repo "$src" --json tagName --jq .tagName)
+            gh release download "$tag" --repo "$src" --pattern '*.apk' --dir "$work/repo"
+            mkdir -p "$work/build/$appid"
+            gh api "repos/$src/tarball/$tag" | tar -xz -C "$work/build/$appid" --strip-components=1 --wildcards '*/fastlane/metadata/android'
+          done
+          (cd "$work" && pipx run --spec fdroidserver==2.4.5 fdroid update)
+          keytool -exportcert -storetype PKCS12 -keystore "$work/keystore.p12" -storepass:env FDROID_KEYSTORE_PASSWORD -alias terminalis \
+            | sha256sum | awk '{print "F-Droid repository fingerprint: " toupper($1)}'
+          mkdir _site/packages/fdroid
+          cp -r "$work/repo" _site/packages/fdroid/
+
+      - name: List each app on the page
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FDROID_BUILD: ${{ runner.temp }}/fdroid/build
+        run: |
+          python3 - <<'EOF'
+          import html, json, os, re, subprocess
+          from datetime import datetime
+          from pathlib import Path
+
+          def gh(path):
+              out = subprocess.run(['gh', 'api', path], check=True, capture_output=True, text=True).stdout
+              return json.loads(out)
+
+          def line(text, pattern):
+              return re.search(pattern, text, re.M).group(1).strip()
+
+          apps = {}
+          for repo in os.environ['FLATPAK_APPS'].split():
+              slug = repo.split('/')[1]
+              ref = Path('flatpak', f'{slug}.flatpakref').read_text()
+              app = apps.setdefault(repo, {})
+              app.setdefault('name', line(ref, r'^Title=(.+)$'))
+              app.setdefault('site', gh(f'repos/{repo}')['homepage'])
+              app['flatpak'] = f'flatpak install --user https://terminalis.github.io/packages/flatpak/{slug}.flatpakref'
+
+          for meta in sorted(Path('fdroid/metadata').glob('*.yml')):
+              text = meta.read_text()
+              repo = line(text, r'^SourceCode: https://github\.com/(\S+)$')
+              title = Path(os.environ['FDROID_BUILD'], meta.stem, 'fastlane/metadata/android/en-US/title.txt')
+              app = apps.setdefault(repo, {})
+              app.setdefault('name', title.read_text().strip())
+              app.setdefault('site', line(text, r'^WebSite: (\S+)$'))
+              app['android'] = meta.stem
+
+          def copy(text):
+              return f'<button type="button" hidden data-copy="{html.escape(text)}">copy</button>'
+
+          rows = []
+          for repo, app in sorted(apps.items(), key=lambda item: item[1]['name'].casefold()):
+              release = gh(f'repos/{repo}/releases/latest')
+              published = datetime.fromisoformat(release['published_at'].replace('Z', '+00:00'))
+              ways = []
+              if 'flatpak' in app:
+                  ways.append(f'<dt>linux</dt><dd><code>{html.escape(app["flatpak"])}</code>{copy(app["flatpak"])}</dd>')
+              if 'android' in app:
+                  ways.append(f'<dt>android</dt><dd><a href="#fdroid">F-Droid repository</a>, app ID <code>{html.escape(app["android"])}</code>{copy(app["android"])}</dd>')
+              rows.append('\n'.join([
+                  f'    <article class="app" id="{html.escape(repo.split("/")[1])}">',
+                  f'      <h2><a href="{html.escape(app["site"])}">{html.escape(app["name"])}</a></h2>',
+                  f'      <p class="release">{html.escape(release["tag_name"])}, {published.day} {published:%b %Y}</p>',
+                  '      <dl class="ways">',
+                  *(f'        {way}' for way in ways),
+                  '      </dl>',
+                  '    </article>',
+              ]))
+
+          page = Path('_site/index.html')
+          text = page.read_text()
+          assert text.count('<!-- apps -->') == 1
+          page.write_text(text.replace('<!-- apps -->', '\n'.join(rows)))
+          EOF
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<title>terminalis packages</title>
+<meta name="description" content="Signed package repositories for apps by terminalis.">
+<meta name="theme-color" content="#000000">
+<link rel="canonical" href="https://terminalis.github.io/">
+<link rel="icon" href="mark.png">
+<link rel="preload" href="fonts/InstrumentSerif-Italic.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="stylesheet" href="style.css">
+<script src="site.js" defer></script>
+</head>
+<body>
+<div class="wall" aria-hidden="true"></div>
+<img class="mark" src="mark.png" width="160" height="160" alt="A line strikes a wall and returns, thinning until it stops.">
+<main>
+  <header>
+    <h1>terminalis</h1>
+    <p>Signed package repositories for apps by terminalis.</p>
+  </header>
+
+  <section class="apps" aria-label="Apps">
+<!-- apps -->
+  </section>
+
+  <section class="repo" id="flatpak">
+    <h2>Flatpak repository</h2>
+    <p>To add the repository without installing an app, so software centers list every app in it:</p>
+    <p class="cmd"><code>flatpak remote-add --user --if-not-exists terminalis https://terminalis.github.io/packages/flatpak/terminalis.flatpakrepo</code><button type="button" hidden data-copy="flatpak remote-add --user --if-not-exists terminalis https://terminalis.github.io/packages/flatpak/terminalis.flatpakrepo">copy</button></p>
+    <p>New versions then arrive through <code>flatpak update</code> and software centers such as GNOME Software and KDE Discover. The apps use runtimes from Flathub, so that needs the Flathub remote too. An app's <code>.flatpakref</code> adds it by itself.</p>
+  </section>
+
+  <section class="repo" id="fdroid">
+    <h2>F-Droid repository</h2>
+    <p>Add it to F-Droid, Droid-ify or Neo Store with this address, which includes the repository's fingerprint. The client then lists every app in the repository and installs their updates.</p>
+    <p class="cmd"><code>https://terminalis.github.io/packages/fdroid/repo?fingerprint=E172E436AAECD5F656AFEB2D40F3011C111C114AB1A60507672CEA5ACBDC17D2</code><button type="button" hidden data-copy="https://terminalis.github.io/packages/fdroid/repo?fingerprint=E172E436AAECD5F656AFEB2D40F3011C111C114AB1A60507672CEA5ACBDC17D2">copy</button></p>
+    <p>In Obtainium, add an app with the "F-Droid Third Party Repo" source, the address <code>https://terminalis.github.io/packages/fdroid/repo</code> and the app's ID.</p>
+  </section>
+
+  <footer>
+    <a href="https://github.com/terminalis/terminalis.github.io">source</a>
+    <a href="https://github.com/terminalis">github.com/terminalis</a>
+  </footer>
+</main>
+</body>
+</html>
