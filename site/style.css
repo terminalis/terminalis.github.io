@@ -1,0 +1,42 @@
+@font-face{font-family:"DM Mono";src:url(fonts/DMMono-Regular.ttf);font-display:swap}
+@font-face{font-family:"Instrument Serif";src:url(fonts/InstrumentSerif-Italic.ttf);font-style:italic;font-display:swap}
+*{box-sizing:border-box}
+:root{--u:2px;--wall:calc(40 * var(--u));--mark:calc(160 * var(--u));--pad:48px;--checker:conic-gradient(#fff 25%,#000 0 50%,#fff 0 75%,#000 0) 0 0/calc(2 * var(--u)) calc(2 * var(--u));color-scheme:dark}
+html{background:#000;color:#fff;font:15px/1.6 "DM Mono",ui-monospace,Consolas,monospace;-webkit-text-size-adjust:100%}
+body{margin:0;position:relative;min-height:100vh}
+::selection{background:#fff;color:#000}
+a{color:inherit;text-underline-offset:4px;text-decoration-thickness:1px}
+a:hover{background:#fff;color:#000;text-decoration:none}
+:focus-visible{outline:1px solid #fff;outline-offset:3px}
+h1,h2{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-weight:400;margin:0}
+.wall{position:absolute;top:0;right:0;bottom:0;width:var(--wall);background:var(--checker)}
+.mark{position:absolute;top:0;right:0;width:var(--mark);height:var(--mark);image-rendering:pixelated}
+main{padding:0 calc(var(--wall) + var(--pad)) 0 var(--pad);max-width:calc(52rem + var(--wall) + 2 * var(--pad))}
+header{min-height:var(--mark);padding:var(--pad) calc(var(--mark) - var(--wall)) 32px 0}
+h1{font-size:clamp(44px,7vw,88px);line-height:.95}
+header p{margin:14px 0 0;max-width:28ch}
+.app,.repo{position:relative;padding:22px 0 30px}
+.app::before,.repo::before{content:"";position:absolute;top:0;left:0;right:0;height:calc(2 * var(--u));background:var(--checker)}
+.app{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:4px 24px}
+.app h2{font-size:44px;line-height:1}
+.release{margin:0;white-space:nowrap}
+.ways{grid-column:1/-1;display:grid;grid-template-columns:72px minmax(0,1fr);gap:6px 12px;margin:14px 0 0}
+.ways dd{margin:0;min-width:0}
+.repo h2{font-size:32px;line-height:1.1;margin-bottom:12px}
+.repo p{margin:0 0 12px;max-width:62ch}
+.repo .cmd{position:relative;max-width:none;padding-left:20px}
+.cmd::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:calc(4 * var(--u));background:var(--checker)}
+code{font:inherit;overflow-wrap:anywhere}
+.repo p:not(.cmd) code{background:#fff;color:#000;padding:0 4px}
+button{font:inherit;font-size:13px;color:#fff;background:#000;border:1px solid #fff;padding:0 8px;margin-left:10px;cursor:pointer;vertical-align:1px}
+button:hover{background:#fff;color:#000}
+footer{display:flex;flex-wrap:wrap;gap:6px 24px;padding:36px 0 56px;font-size:13px}
+@media (max-width:719px){
+  :root{--u:1px;--pad:16px}
+  header{padding-top:20px}
+  h1{font-size:40px}
+  .app{grid-template-columns:minmax(0,1fr)}
+  .app h2{font-size:36px}
+  .ways{grid-template-columns:minmax(0,1fr);gap:2px}
+  .ways dd{margin-bottom:10px}
+}
