@@ -78,6 +78,7 @@ jobs:
           chmod 600 "$work/config.yml"
           echo "$FDROID_KEYSTORE" | base64 -d > "$work/keystore.p12"
           mkdir "$work/repo"
+          shopt -s nullglob
           for meta in fdroid/metadata/*.yml; do
             appid=$(basename "$meta" .yml)
             src=$(sed -n 's|^SourceCode: https://github.com/||p' "$meta")
